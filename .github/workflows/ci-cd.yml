@@ -24,9 +24,9 @@ jobs:
       - name: Build Docker image
         run: docker build -t aisuragon/devopstp:latest .
 
-      - name: Install Trivy
-        run: |
-          curl -sSfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+     # - name: Install Trivy
+      #  run: |
+       #   curl -sSfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
 
       - name: Scan Docker image with Trivy
         run: |
