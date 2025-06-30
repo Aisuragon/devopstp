@@ -6,7 +6,7 @@ on:
 
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest  # ✅ Utilise ton runner local
+    runs-on: self-hosted  # ✅ Utilise ton runner local
 
     steps:
       - name: Checkout source code
@@ -42,9 +42,8 @@ jobs:
       - name: Push Docker image to DockerHub
         run: docker push aisuragon/devopstp:latest
 
-      - name: Deploy local container
+      - name: Run Docker image locally
         run: |
-          docker pull aisuragon/devopstp:latest
           docker stop devopstp || true
           docker rm devopstp || true
           docker run -d --name devopstp -p 8080:8080 aisuragon/devopstp:latest
