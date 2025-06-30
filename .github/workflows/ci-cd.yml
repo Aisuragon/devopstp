@@ -6,51 +6,46 @@ on:
 
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted  # ✅ Utilise ton runner local
 
     steps:
-    - name: Checkout source code
-      uses: actions/checkout@v3
+      - name: Checkout source code
+        uses: actions/checkout@v3
 
-    - name: Set up JDK 17
-      uses: actions/setup-java@v3
-      with:
-        java-version: 17
-        distribution: temurin
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: temurin
 
-    - name: Build with Maven
-      run: mvn clean install
+      - name: Build with Maven
+        run: mvn clean install
 
-    - name: Build Docker image
-      run: docker build -t aisuragon/devopstp:latest .
+      - name: Build Docker image
+        run: docker build -t aisuragon/devopstp:latest .
 
-    - name: Install Trivy
-      run: |
-        curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+      - name: Install Trivy
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
 
-    - name: Scan Docker image with Trivy
-      run: |
-        trivy image --format table \
-          --severity MEDIUM,HIGH,CRITICAL \
-          --ignore-unfixed \
-          --exit-code 0 \
-          aisuragon/devopstp:latest
+      - name: Scan Docker image with Trivy
+        run: |
+          trivy image --format table \
+            --severity MEDIUM,HIGH,CRITICAL \
+            --ignore-unfixed \
+            --exit-code 0 \
+            aisuragon/devopstp:latest
 
-    - name: Login to DockerHub
-      run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+      - name: Login to DockerHub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
 
-    - name: Push Docker image to DockerHub
-      run: docker push aisuragon/devopstp:latest
+      - name: Push Docker image to DockerHub
+        run: docker push aisuragon/devopstp:latest
 
-    - name: Deploy on remote VM via SSH
-      uses: appleboy/ssh-action@v0.1.10
-      with:
-        host: ${{ secrets.SSH_HOST }}
-        username: ${{ secrets.SSH_USER }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        port: 22
-        script: |
-          sudo docker pull aisuragon/devopstp:latest
-          sudo docker stop devopstp || true
-          sudo docker rm devopstp || true
-          sudo docker run -d --name devopstp -p 8080:8080 aisuragon/devopstp:latest
+      - name: Deploy local container
+        run: |
+          docker pull aisuragon/devopstp:latest
+          docker stop devopstp || true
+          docker rm devopstp || true
+          docker run -d --name devopstp -p 8080:8080 aisuragon/devopstp:latest
+
