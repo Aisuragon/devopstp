@@ -42,3 +42,14 @@ jobs:
     - name: Push Docker image to DockerHub
       run: docker push aisuragon/devopstp:latest
 
+    - name: Deploy on remote VM via SSH
+      uses: appleboy/ssh-action@v0.1.10
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          docker pull aisuragon/devopstp:latest
+          docker stop devopstp || true
+          docker rm devopstp || true
+          docker run -d --name devopstp -p 8080:8080 aisuragon/devopstp:latest
