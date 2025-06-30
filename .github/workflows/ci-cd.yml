@@ -6,7 +6,7 @@ on:
 
 jobs:
   build-and-deploy:
-    runs-on: self-hosted  # ✅ Utilise ton runner local
+    runs-on: ubuntu-latest  # ✅ Utilise ton runner local
 
     steps:
       - name: Checkout source code
